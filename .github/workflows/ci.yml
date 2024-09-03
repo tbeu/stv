@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.toolchain }}, ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - linux
+          - windows
+        python-version:
+          - '3.10'
+          - '3.11'
+          - '3.12'
+        include:
+          - toolchain: linux
+            os: ubuntu-latest
+          - toolchain: windows
+            os: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 5
+      - name: Setup python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup PyRankVote
+        run: pip install -U pyrankvote
+      - name: Test
+        run: python ./stv.py
